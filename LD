@@ -1,0 +1,106 @@
+import pandas as pd
+
+# Last inn de to datasettene
+data_2018 = pd.read_csv('2018data.csv', sep=';')
+data_2025 = pd.read_csv('2025data.csv', sep=';')
+
+# Konverter til heltall
+data_2018['soeknads_aar'] = data_2018['soeknads_aar'].fillna(2018).astype(int)
+data_2025['soeknads_aar'] = data_2025['soeknads_aar'].fillna(2025).astype(int)
+data_2018['saksbehandlende_kommune'] = data_2018['saksbehandlende_kommune'].fillna(0).astype(int)
+data_2025['saksbehandlende_kommune'] = data_2025['saksbehandlende_kommune'].fillna(0).astype(int)
+
+# Filtrer 2018 data
+kommuner_2018 = [211, 213, 214, 215, 216, 217, 219, 220, 221, 226, 227, 228, 229, 230, 231, 233, 234, 235, 236, 237, 238, 239, 299]
+data_2018 = data_2018[data_2018['saksbehandlende_kommune'].isin(kommuner_2018)]
+
+# Filtrer 2025 data
+kommuner_2025 = [3201, 3203, 3205, 3207, 3209, 3212, 3214, 3216, 3218, 3220, 3222, 3224, 3226, 3228, 3230, 3232, 3234, 3236, 3238, 3240, 3242]
+data_2025 = data_2025[data_2025['saksbehandlende_kommune'].isin(kommuner_2025)]
+
+# Vis resultatet
+print("2018 data (filtrert):")
+print(data_2018.head())
+print(f"Antall rader: {len(data_2018)}")
+
+print("\n2025 data (filtrert):")
+print(data_2025.head())
+print(f"Antall rader: {len(data_2025)}")
+
+# Beregn totaler for 2018
+print("=== TOTALER FOR 2018 ===")
+print(f"Total areal: {data_2018['totalareal'].sum()}")
+print(f"Fulldyrket: {data_2018['fulldyrket'].sum()}")
+print(f"Overflatedyrket: {data_2018['overflatedyrket'].sum()}")
+print(f"Innmarksbeite: {data_2018['innmarksbeite'].sum()}")
+
+print("\n=== TOTALER FOR 2025 ===")
+print(f"Total areal: {data_2025['totalareal'].sum()}")
+print(f"Fulldyrket: {data_2025['fulldyrket'].sum()}")
+print(f"Overflatedyrket: {data_2025['overflatedyrket'].sum()}")
+print(f"Innmarksbeite: {data_2025['innmarksbeite'].sum()}")
+
+print("\n=== ENDRING FRA 2018 TIL 2025 ===")
+print(f"Total areal: {data_2025['totalareal'].sum() - data_2018['totalareal'].sum()}")
+print(f"Fulldyrket: {data_2025['fulldyrket'].sum() - data_2018['fulldyrket'].sum()}")
+print(f"Overflatedyrket: {data_2025['overflatedyrket'].sum() - data_2018['overflatedyrket'].sum()}")
+print(f"Innmarksbeite: {data_2025['innmarksbeite'].sum() - data_2018['innmarksbeite'].sum()}")
+
+
+# Tell antall unike organisasjonsnummer
+antall_unique_orgnr_2018 = data_2018['orgnr'].nunique()
+antall_unique_orgnr_2025 = data_2025['orgnr'].nunique()
+
+print(f"Antall unike organisasjonsnummer i 2018: {antall_unique_orgnr_2018}")
+print(f"Antall unike organisasjonsnummer i 2025: {antall_unique_orgnr_2025}")
+
+# Vis de unike organisasjonsnumrene (valgfritt)
+print("\nUnike organisasjonsnummer i 2018:")
+print(data_2018['orgnr'].unique())
+
+print("\nUnike organisasjonsnummer i 2025:")
+print(data_2025['orgnr'].unique())
+
+# Opprett en Excel-fil med begge datasettene i separate ark
+with pd.ExcelWriter('datasett_2018_2025.xlsx', engine='openpyxl') as writer:
+    data_2018.to_excel(writer, sheet_name='2018 data', index=False)
+    data_2025.to_excel(writer, sheet_name='2025 data', index=False)
+
+print("Excel-filen 'datasett_2018_2025.xlsx' er opprettet!")
+
+
+
+# For 2018 data
+# Filtrer bort rader hvor fulldyrket er 0, NaN eller tom
+data_2018_med_fulldyrket = data_2018[(data_2018['fulldyrket'].notna()) & (data_2018['fulldyrket'] > 0)]
+antall_orgnr_2018 = data_2018_med_fulldyrket['orgnr'].nunique()
+antall_rader_2018 = len(data_2018_med_fulldyrket)
+
+print("=== 2018 DATA ===")
+print(f"Antall unike organisasjonsnummer med fulldyrket > 0: {antall_orgnr_2018}")
+print(f"Antall rader med fulldyrket > 0: {antall_rader_2018}")
+
+# For 2025 data
+data_2025_med_fulldyrket = data_2025[(data_2025['fulldyrket'].notna()) & (data_2025['fulldyrket'] > 0)]
+antall_orgnr_2025 = data_2025_med_fulldyrket['orgnr'].nunique()
+antall_rader_2025 = len(data_2025_med_fulldyrket)
+
+print("\n=== 2025 DATA ===")
+print(f"Antall unike organisasjonsnummer med fulldyrket > 0: {antall_orgnr_2025}")
+print(f"Antall rader med fulldyrket > 0: {antall_rader_2025}")
+
+print("\n=== SAMMENLIGNING ===")
+print(f"Endring i antall orgnr: {antall_orgnr_2025 - antall_orgnr_2018}")
+print(f"Endring i antall rader: {antall_rader_2025 - antall_rader_2018}")
+
+# Filtrer for kommune 3234 og 3236 i 2025 data
+kommuner_subset = data_2025[data_2025['saksbehandlende_kommune'].isin(['3234', '3236'])]
+
+print("=== KOMMUNE 3234 OG 3236 (2025) ===")
+print(f"Antall unike organisasjonsnummer: {kommuner_subset['orgnr'].nunique()}")
+
+# Hvis du vil se tallene for hver kommune separat:
+print("\n=== PER KOMMUNE ===")
+for kommune in ['3234', '3236']:
+    kommune_data = data_2025[data_2025['saksbehandlende_kommune'] == kommune]
+    print(f"Kommune {kommune}: {kommune_data['orgnr'].nunique()} unike orgnr")
