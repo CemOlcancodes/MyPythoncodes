@@ -1,0 +1,68 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Data
+fylker = ['Oslo', 'Rogaland', 'Møre og Romsdal', 'Nordland', 'Østfold', 
+          'Akershus', 'Buskerud', 'Innlandet', 'Vestfold', 'Telemark', 
+          'Agder', 'Vestland', 'Trøndelag', 'Troms', 'Finnmark']
+
+siktelser_totalt = [9.73, 9.34, 11.28, 9.58, 11.34, 8.94, 10.15, 9.23, 
+                    9.30, 10.82, 9.21, 8.18, 8.81, 11.81, 15.23]
+
+siktelser_uten_trafikk = [6.88, 6.24, 6.97, 5.73, 7.05, 5.44, 5.74, 5.58, 
+                          6.13, 7.30, 6.54, 5.02, 5.26, 7.10, 9.77]
+
+# Sorter data etter totalt (synkende)
+sorted_indices = np.argsort(siktelser_totalt)[::-1]
+fylker_sorted = [fylker[i] for i in sorted_indices]
+totalt_sorted = [siktelser_totalt[i] for i in sorted_indices]
+uten_trafikk_sorted = [siktelser_uten_trafikk[i] for i in sorted_indices]
+
+# UU-vennlige farger (fargeblindvennlig palett)
+# Bruker blå og lilla som er godt synlig for de fleste typer fargeblindhet
+farge_totalt = '#0173B2'  # Blå
+farge_uten_trafikk = '#8E44AD'  # Lilla
+
+# Opprett figur
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Posisjon for søylene
+x = np.arange(len(fylker_sorted))
+width = 0.35
+
+# Lag søylene
+bars1 = ax.barh(x + width/2, totalt_sorted, width, label='Totalt', 
+                color=farge_totalt, alpha=0.9)
+bars2 = ax.barh(x - width/2, uten_trafikk_sorted, width, 
+                label='Uten trafikkovertredelser', color=farge_uten_trafikk, alpha=0.9)
+
+# Legg til tallverdier på søylene
+for i, (bar, value) in enumerate(zip(bars1, totalt_sorted)):
+    ax.text(value + 0.2, bar.get_y() + bar.get_height()/2, f'{value:.2f}', 
+            va='center', fontsize=9, fontweight='bold')
+
+for i, (bar, value) in enumerate(zip(bars2, uten_trafikk_sorted)):
+    ax.text(value + 0.2, bar.get_y() + bar.get_height()/2, f'{value:.2f}', 
+            va='center', fontsize=9, fontweight='bold')
+
+# Stil og etiketter
+ax.set_xlabel('Siktelser per 1000 innbyggere', fontsize=12, fontweight='bold')
+ax.set_title('Kriminalitet per 1000 innbyggere etter fylke', 
+             fontsize=14, fontweight='bold', pad=20)
+ax.set_yticks(x)
+ax.set_yticklabels(fylker_sorted, fontsize=10)
+ax.legend(fontsize=11, loc='upper right')
+
+# Legg til rutenett for bedre lesbarhet
+ax.grid(axis='x', alpha=0.3, linestyle='--')
+ax.set_axisbelow(True)
+
+# Juster layout
+plt.tight_layout()
+
+# Lagre figuren
+plt.savefig('/mnt/user-data/outputs/kriminalitet_diagram.png', dpi=300, bbox_inches='tight')
+print("Diagram lagret som 'kriminalitet_diagram.png'")
+
+# Vis diagrammet
+plt.show()
