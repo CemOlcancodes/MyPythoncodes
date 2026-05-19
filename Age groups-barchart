@@ -1,0 +1,56 @@
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+import os
+
+aldersgrupper = ['Under 18', '18-24', '25-34', '35-44', '45-61', '62+']
+verdier = [5927, -3257, 892, 13867, 3147, 769]
+farger = ['#1D9E75' if v >= 0 else '#D85A30' for v in verdier]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+fig.patch.set_facecolor('white')
+ax.set_facecolor('white')
+
+x = np.arange(len(aldersgrupper))
+bars = ax.bar(x, verdier, color=farger, width=0.55, linewidth=0)
+
+for bar, v in zip(bars, verdier):
+    offset = 150 if v >= 0 else -150
+    va = 'bottom' if v >= 0 else 'top'
+    ax.text(
+        bar.get_x() + bar.get_width() / 2,
+        v + offset,
+        f'{v:+,.0f}'.replace(',', '\u202f'),
+        ha='center', va=va,
+        fontsize=10, fontweight='bold',
+        color='#1D9E75' if v >= 0 else '#D85A30'
+    )
+
+ax.axhline(0, color='#aaaaaa', linewidth=0.8, zorder=0)
+ax.set_xticks(x)
+ax.set_xticklabels(aldersgrupper, fontsize=11, color='#444441')
+ax.set_ylabel('Netto sekundærflytting', fontsize=11, color='#5F5E5A')
+
+ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f'{int(v):,}'.replace(',', '\u202f')))
+ax.tick_params(axis='y', labelcolor='#888780', labelsize=9)
+ax.tick_params(axis='x', length=0)
+
+for spine in ['top', 'right', 'left']:
+    ax.spines[spine].set_visible(False)
+ax.spines['bottom'].set_color('#D3D1C7')
+
+ax.yaxis.grid(True, color='#EBEBEB', linewidth=0.7, zorder=0)
+ax.set_axisbelow(True)
+
+fig.suptitle('Netto sekundærflytting til Akershus 2021–2026\netter aldersgruppe', 
+             fontsize=13, fontweight='bold', color='#2C2C2A')
+
+total = sum(verdier)
+ax.annotate(f'Total netto: +{total:,}'.replace(',', '\u202f'),
+            xy=(0.99, 0.02), xycoords='axes fraction',
+            ha='right', va='bottom', fontsize=9, color='#888780')
+
+plt.tight_layout()
+output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'akershus_alder.png')
+plt.savefig(output_path, dpi=160, bbox_inches='tight')
+print(f'Lagret til: {output_path}')
