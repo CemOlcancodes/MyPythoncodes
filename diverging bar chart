@@ -1,0 +1,63 @@
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import numpy as np
+
+municipalities = [
+    "Bærum", "Asker", "Lillestrøm", "Nordre Follo", "Ullensaker",
+    "Nesodden", "Frogn", "Vestby", "Ås", "Enebakk", "Lørenskog",
+    "Rælingen", "Aurskog-Høland", "Nes", "Gjerdrum", "Nittedal",
+    "Lunner", "Jevnaker", "Nannestad", "Eidsvoll", "Hurdal"
+]
+
+A = [-869, 766, -328, -433, 28, -68, 74, 302, 290, -23, -584, -23, 173, 326, 80, -262, 83, 36, 284, 105, 43]
+B = [-967, 424, -142, -21, 249, -32, -6, 151, -87, 56, -188, -119, 172, 200, 3, -195, 18, 61, 126, 266, 31]
+
+# Keep original order (Bærum, Asker, ... Hurdal), reversed so Bærum ends up at top
+# when plotted bottom-to-top on a horizontal axis
+order = list(range(len(municipalities)))[::-1]
+municipalities_sorted = [municipalities[i] for i in order]
+A_sorted = [A[i] for i in order]
+B_sorted = [B[i] for i in order]
+
+y = np.arange(len(municipalities_sorted))
+height = 0.38
+
+fig, ax = plt.subplots(figsize=(10, 12))
+
+bars_a = ax.barh(y + height/2, A_sorted, height=height, color="#1f77b4", label="A – Født i Norge m/ to norskfødte foreldre")
+bars_b = ax.barh(y - height/2, B_sorted, height=height, color="#d62728", label="B – Innvandrere")
+
+ax.set_yticks(y)
+ax.set_yticklabels(municipalities_sorted, fontsize=11)
+ax.tick_params(axis="y", length=0)
+ax.axvline(0, color="black", linewidth=0.8)
+ax.set_xlabel("Netto innflytting")
+ax.legend(loc="lower right", frameon=False, fontsize=10)
+
+ax.grid(axis="x", linestyle="-", linewidth=0.5, alpha=0.3)
+ax.set_axisbelow(True)
+for spine in ["top", "right", "left"]:
+    ax.spines[spine].set_visible(False)
+
+# value labels
+def label_bars(bars, values):
+    for bar, val in zip(bars, values):
+        x = bar.get_width()
+        y_pos = bar.get_y() + bar.get_height()/2
+        offset = 8 if x >= 0 else -8
+        ha = "left" if x >= 0 else "right"
+        ax.annotate(f"{val:,}".replace(",", " "),
+                    xy=(x, y_pos), xytext=(offset, 0),
+                    textcoords="offset points",
+                    va="center", ha=ha, fontsize=9, color="#333333")
+
+label_bars(bars_a, A_sorted)
+label_bars(bars_b, B_sorted)
+
+ax.set_xlim(min(min(A), min(B)) - 150, max(max(A), max(B)) + 150)
+ax.set_ylim(-1, len(municipalities_sorted))
+
+plt.title("Netto innflytting per kommune, etter innvandringskategori", fontsize=13, pad=15)
+plt.tight_layout()
+plt.savefig("/mnt/user-data/outputs/netto_innflytting_horisontal.png", dpi=200, bbox_inches="tight")
+print("done")
