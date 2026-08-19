@@ -1,0 +1,60 @@
+import matplotlib.pyplot as plt
+ 
+# Data i rekkefølge fra Excel-filen (region-gruppert: Asker/Bærum, Follo,
+# Nedre Romerike, Øvre Romerike, Hadeland)
+kommuner = [
+    "Bærum", "Asker", "Nordre Follo", "Nesodden", "Frogn", "Vestby", "Ås",
+    "Enebakk", "Lillestrøm", "Lørenskog", "Rælingen", "Aurskog-Høland",
+    "Nittedal", "Nes", "Gjerdrum", "Lunner", "Jevnaker", "Ullensaker",
+    "Nannestad", "Eidsvoll", "Hurdal"
+]
+ 
+verdier = [
+    -2139, 1387, -511, -108, 125, 558, 215,
+    -11, -612, -900, -146, 374,
+    -521, 640, 150, 112, 66, 307,
+    472, 463, 79
+]
+ 
+# Farger som i bildet: blå for positiv, rød for negativ
+farge_positiv = "#1F4E8C"
+farge_negativ = "#B22222"
+farger = [farge_positiv if v >= 0 else farge_negativ for v in verdier]
+ 
+fig, ax = plt.subplots(figsize=(10, 12))
+ 
+y_pos = range(len(kommuner))
+bars = ax.barh(y_pos, verdier, color=farger)
+ 
+ax.set_yticks(y_pos)
+ax.set_yticklabels(kommuner)
+ax.tick_params(axis="y", length=0)
+ax.invert_yaxis()  # Bærum øverst, Hurdal nederst
+ 
+ax.axvline(0, color="black", linewidth=0.8)
+ax.set_xlabel("Nettoflytting (antall personer)")
+ax.set_title("Nettoflytting til kommuner i Akershus (2021-2026)", fontsize=13, fontweight="bold")
+ 
+# Verdi-etiketter ved hver stolpe
+for bar, verdi in zip(bars, verdier):
+    width = bar.get_width()
+    offset = 30 if width >= 0 else -30
+    ha = "left" if width >= 0 else "right"
+    ax.text(width + offset, bar.get_y() + bar.get_height()/2,
+             f"{verdi:+d}", va="center", ha=ha, fontsize=9)
+ 
+# Legende
+from matplotlib.patches import Patch
+legend_elements = [
+    Patch(facecolor=farge_positiv, label="Positiv nettoflytting"),
+    Patch(facecolor=farge_negativ, label="Negativ nettoflytting"),
+]
+ax.legend(handles=legend_elements, loc="lower right")
+ 
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.spines["left"].set_visible(False)
+ 
+plt.tight_layout()
+plt.savefig("/mnt/user-data/outputs/nettoflytting_kommuner_akershus.png", dpi=200, bbox_inches="tight")
+print("Ferdig")
