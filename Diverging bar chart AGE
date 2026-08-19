@@ -1,0 +1,68 @@
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+import os
+ 
+aldersgrupper = ['6-18', '18-24', '25-34', '35-44', '45-61', '62+']
+verdier = [5927, -3257, 892, 13867, 3147, 769]
+farger = ['#1A5799' if v >= 0 else '#A63020' for v in verdier]
+ 
+fig, ax = plt.subplots(figsize=(10, 6))
+fig.patch.set_facecolor('white')
+ax.set_facecolor('white')
+ 
+y = np.arange(len(aldersgrupper))
+bars = ax.barh(y, verdier, color=farger, height=0.55, linewidth=0)
+ 
+for bar, v in zip(bars, verdier):
+    if v >= 0:
+        # Utenfor stolpen, til høyre
+        x_pos = v + 400
+        ha = 'left'
+        color = '#222222'
+    else:
+        # Inne i stolpen, nær venstre kant
+        x_pos = v + 150
+        ha = 'left'
+        color = 'white'
+ 
+    ax.text(
+        x_pos,
+        bar.get_y() + bar.get_height() / 2,
+        f'{v:+,.0f}'.replace(',', ' '),
+        ha=ha, va='center',
+        fontsize=10, fontweight='bold',
+        color=color,
+        clip_on=False
+    )
+ 
+ax.axvline(0, color='#aaaaaa', linewidth=0.8, zorder=0)
+ax.set_yticks(y)
+ax.set_yticklabels(aldersgrupper, fontsize=11, color='#444441')
+ax.set_xlabel('Nettoflytting', fontsize=11, color='#5F5E5A')
+ 
+ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f'{int(v):,}'.replace(',', ' ')))
+ax.tick_params(axis='x', labelcolor='#888780', labelsize=9)
+ax.tick_params(axis='y', length=0)
+ 
+for spine in ['top', 'right', 'bottom']:
+    ax.spines[spine].set_visible(False)
+ax.spines['left'].set_color('#D3D1C7')
+ 
+ax.xaxis.grid(True, color='#EBEBEB', linewidth=0.7, zorder=0)
+ax.set_axisbelow(True)
+ 
+ax.invert_yaxis()
+ 
+fig.suptitle('Nettoflytting til Akershus 2021–2026\netter aldersgruppe',
+             fontsize=13, fontweight='bold', color='#2C2C2A')
+ 
+total = sum(verdier)
+ax.annotate(f'Total netto: {total:+,}'.replace(',', ' '),
+            xy=(0.99, 0.02), xycoords='axes fraction',
+            ha='right', va='bottom', fontsize=9, color='#888780')
+ 
+plt.tight_layout(rect=[0, 0, 1, 0.93])
+output_path = os.path.join(os.getcwd(), 'akershus_alder.png')
+plt.savefig(output_path, dpi=160, bbox_inches='tight')
+print(f'Lagret til: {output_path}')
