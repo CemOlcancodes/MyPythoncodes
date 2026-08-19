@@ -1,0 +1,76 @@
+ytting · PY
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import numpy as np
+ 
+data = [
+    ('Bærum',          -11),
+    ('Asker',          -30),
+    ('Nordre Follo',    61),
+    ('Nesodden',        -2),
+    ('Frogn',           -4),
+    ('Vestby',           0),
+    ('Ås',              13),
+    ('Enebakk',          4),
+    ('Lillestrøm',     239),
+    ('Lørenskog',      166),
+    ('Rælingen',         3),
+    ('Aurskog-Høland',   0),
+    ('Nittedal',        40),
+    ('Nes',              2),
+    ('Gjerdrum',        16),
+    ('Lunner',          -2),
+    ('Jevnaker',        -6),
+    ('Ullensaker',      96),
+    ('Nannestad',        6),
+    ('Eidsvoll',         2),
+    ('Hurdal',          -1),
+]
+ 
+kommuner = [d[0] for d in data]
+verdier  = [d[1] for d in data]
+farger   = ['#4472C4' if v >= 0 else '#C0504D' for v in verdier]
+ 
+fig, ax = plt.subplots(figsize=(9, 7.5))
+ 
+y_pos = np.arange(len(kommuner))
+bars = ax.barh(y_pos, verdier, color=farger, height=0.55)
+ 
+# Verdi-etiketter
+for bar, v in zip(bars, verdier):
+    if v == 0:
+        ax.text(1, bar.get_y() + bar.get_height() / 2,
+                '0', va='center', ha='left', fontsize=9, color='#555')
+    elif v > 0:
+        ax.text(v + 2, bar.get_y() + bar.get_height() / 2,
+                str(v), va='center', ha='left', fontsize=9, color='#333')
+    else:
+        ax.text(v - 2, bar.get_y() + bar.get_height() / 2,
+                str(v), va='center', ha='right', fontsize=9, color='#333')
+ 
+ax.set_yticks(y_pos)
+ax.set_yticklabels(kommuner, fontsize=10)
+ax.set_xlabel('Nettoflytting', fontsize=10)
+ax.set_xlim(-50, 260)
+ax.axvline(0, color='#888', linewidth=1.2)
+ax.grid(axis='x', color='#D9D9D9', linewidth=0.8, zorder=0)
+ax.set_axisbelow(True)
+ 
+ax.set_title(
+    'Nettoflytting til kommunene i Akershus blant personer\n'
+    'som mottok sosialhjelp per 1. desember 2024 (2020–2025)',
+    fontsize=12, fontweight='bold', pad=12
+)
+ 
+ax.text(1.0, -0.04, 'Kilde: Microdata.no',
+        transform=ax.transAxes, ha='right', fontsize=8.5, color='#666')
+ 
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+ax.tick_params(axis='y', length=0)
+ax.invert_yaxis()
+ 
+plt.tight_layout()
+plt.savefig('nettoflytting_2020_2025.png', dpi=150, bbox_inches='tight')
+plt.show()
